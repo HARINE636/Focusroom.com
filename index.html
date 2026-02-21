@@ -1,30 +1,56 @@
-<!DOCTYPE html>
-<html>
 <head>
 <title>Focus Room</title>
 
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <style>
+
+/* Background Animation */
 body{
     margin:0;
-    font-family:Arial;
-    text-align:center;
-    background:linear-gradient(to bottom,#1e3c72,#2a5298);
+    font-family:Arial, sans-serif;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    min-height:100vh;
+    background:linear-gradient(-45deg, #141e30, #243b55, #0f2027, #2c5364);
+    background-size:400% 400%;
+    animation:gradientMove 12s ease infinite;
     color:white;
 }
 
-.hidden{display:none;}
-
-.container{
-    margin-top:100px;
+/* Smooth moving gradient */
+@keyframes gradientMove {
+    0% {background-position:0% 50%;}
+    50% {background-position:100% 50%;}
+    100% {background-position:0% 50%;}
 }
 
+/* Main container fixed portrait style */
+.container{
+    width:95%;
+    max-width:420px;   /* Portrait width limit */
+    background:rgba(255,255,255,0.08);
+    backdrop-filter:blur(15px);
+    padding:30px 20px;
+    border-radius:20px;
+    box-shadow:0 15px 40px rgba(0,0,0,0.4);
+    text-align:center;
+}
+
+/* Buttons */
 button{
-    padding:10px 20px;
+    padding:12px 20px;
     margin:10px;
     font-size:16px;
     border:none;
-    border-radius:6px;
+    border-radius:8px;
     cursor:pointer;
+    transition:0.3s;
+}
+
+button:hover{
+    transform:scale(1.05);
 }
 
 .primary{
@@ -38,158 +64,38 @@ button{
 }
 
 select,input{
-    padding:8px;
+    width:90%;
+    padding:10px;
     font-size:16px;
+    border-radius:6px;
+    border:none;
+    margin-top:10px;
 }
+
 #timer{
-    font-size:60px;
+    font-size:50px;
     margin-top:20px;
 }
+
 #quote{
     margin-top:15px;
     font-style:italic;
+    opacity:0.9;
 }
-#groupUsers{
-    margin-top:15px;
+
+.hidden{
+    display:none;
 }
+
+/* Extra mobile polish */
+@media (max-width:480px){
+    .container{
+        padding:25px 15px;
+    }
+    #timer{
+        font-size:42px;
+    }
+}
+
 </style>
 </head>
-
-<body>
-
-<div class="container">
-
-<!-- Name Section -->
-<div id="nameSection">
-    <h1>Focus Room</h1>
-    <input type="text" id="username" placeholder="Enter your name">
-    <br><br>
-    <button class="primary" onclick="saveName()">Continue</button>
-</div>
-
-<!-- Room Selection -->
-<div id="roomSection" class="hidden">
-    <h2>Select Room</h2>
-    <button class="primary" onclick="selectRoom('private')">Private Room</button>
-    <button class="primary" onclick="selectRoom('group')">Group Room</button>
-</div>
-
-<!-- Timer Section -->
-<div id="timerSection" class="hidden">
-    <h2 id="roomTitle"></h2>
-
-    <div id="groupUsers"></div>
-
-    <br>
-
-    <select id="timeSelect">
-        <option value="15">15 Minutes</option>
-        <option value="30">30 Minutes</option>
-        <option value="45">45 Minutes</option>
-        <option value="60">60 Minutes</option>
-    </select>
-
-    <br><br>
-
-    <button class="primary" onclick="startTimer()">Start Focus</button>
-    <button class="danger" onclick="emergencyExit()">Emergency Exit</button>
-
-    <div id="timer"></div>
-    <div id="quote"></div>
-</div>
-
-<audio id="bgMusic" src="music.mp3" loop></audio>
-
-</div>
-
-<script>
-let interval;
-let currentUser="";
-let exitPressed=false;
-
-const quotes=[
-"Stay focused. Your goals matter.",
-"Discipline creates freedom.",
-"One session at a time.",
-"Focus now. Win later."
-];
-
-function saveName(){
-    let name=document.getElementById("username").value.trim();
-    if(name===""){
-        alert("Enter your name");
-        return;
-    }
-    currentUser=name;
-    document.getElementById("nameSection").classList.add("hidden");
-    document.getElementById("roomSection").classList.remove("hidden");
-}
-
-function selectRoom(type){
-    document.getElementById("roomSection").classList.add("hidden");
-    document.getElementById("timerSection").classList.remove("hidden");
-
-    if(type==="private"){
-        document.getElementById("roomTitle").innerText="Private Focus Room";
-        document.getElementById("groupUsers").innerText="";
-    }
-    else{
-        document.getElementById("roomTitle").innerText="Group Focus Room";
-
-        let users=JSON.parse(localStorage.getItem("groupUsers"))||[];
-
-        if(!users.includes(currentUser)){
-            users.push(currentUser);
-            localStorage.setItem("groupUsers",JSON.stringify(users));
-        }
-
-        if(users.length===0){
-            document.getElementById("groupUsers").innerText="Nobody has joined yet.";
-        }else{
-            document.getElementById("groupUsers").innerText="Users in room: "+users.join(", ");
-        }
-    }
-}
-
-function startTimer(){
-    let minutes=parseInt(document.getElementById("timeSelect").value);
-    let totalSeconds=minutes*60;
-
-    let music=document.getElementById("bgMusic");
-    music.currentTime=0;
-    music.play();
-
-    document.getElementById("quote").innerText=
-        quotes[Math.floor(Math.random()*quotes.length)];
-
-    interval=setInterval(function(){
-        let m=Math.floor(totalSeconds/60);
-        let s=totalSeconds%60;
-        document.getElementById("timer").innerText=
-            (m<10?"0":"")+m+":"+(s<10?"0":"")+s;
-
-        totalSeconds--;
-
-        if(totalSeconds<0){
-            clearInterval(interval);
-            music.pause();
-            alert("Session Completed!");
-        }
-    },1000);
-}
-
-function emergencyExit(){
-    if(!exitPressed){
-        alert("Are you sure? Focus is still running.");
-        exitPressed=true;
-    }
-    else{
-        clearInterval(interval);
-        document.getElementById("bgMusic").pause();
-        location.reload();
-    }
-}
-</script>
-
-</body>
-</html>
