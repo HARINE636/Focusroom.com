@@ -1,8 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Focus Room</title>
-
+<title>Deep Focus Room</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
@@ -28,70 +27,84 @@ body{
 
 .container{
     width:95%;
-    max-width:420px;
+    max-width:450px;
     background:rgba(255,255,255,0.08);
     backdrop-filter:blur(15px);
-    padding:30px 20px;
+    padding:25px 20px;
     border-radius:20px;
     box-shadow:0 15px 40px rgba(0,0,0,0.4);
     text-align:center;
 }
 
-.hidden{
-    display:none;
-}
+.hidden{ display:none; }
 
 button{
-    padding:12px 20px;
-    margin:10px;
-    font-size:16px;
+    padding:10px 18px;
+    margin:6px;
+    font-size:15px;
     border:none;
     border-radius:8px;
     cursor:pointer;
     transition:0.3s;
 }
 
-button:hover{
-    transform:scale(1.05);
-}
+button:hover{ transform:scale(1.05); }
 
-.primary{
-    background:#2E6F95;
-    color:white;
-}
+.primary{ background:#2E6F95; color:white; }
+.danger{ background:#ff4d4d; color:white; }
 
-.danger{
-    background:#ff4d4d;
-    color:white;
-}
-
-select,input{
+input{
     width:90%;
-    padding:10px;
-    font-size:16px;
+    padding:8px;
+    font-size:15px;
     border-radius:6px;
     border:none;
-    margin-top:10px;
+    margin-top:8px;
+}
+
+.volume-note{
+    font-weight:700;
+    font-size:16px;
+    margin:12px 0;
+}
+
+.task-card{
+    background:rgba(255,255,255,0.12);
+    padding:12px;
+    border-radius:12px;
+    margin-top:12px;
+    text-align:left;
+}
+
+.task-card h4{
+    margin:0 0 5px 0;
+}
+
+.task-card p{
+    margin:0;
+    font-size:14px;
+    opacity:0.8;
 }
 
 #timer{
-    font-size:50px;
+    font-size:42px;
     margin-top:20px;
 }
 
-#quote{
-    margin-top:15px;
-    font-style:italic;
-    opacity:0.9;
+.footer{
+    font-size:13px;
+    margin-top:20px;
+    opacity:0.85;
 }
 
-/* Bold Volume Notice */
-.volume-note{
-    font-weight:700;
-    font-size:18px;
-    margin-bottom:15px;
-    letter-spacing:0.5px;
-    color:#ffffff;
+.footer a{
+    color:#2E6F95;
+    text-decoration:none;
+    font-weight:600;
+}
+
+.footer a:hover{
+    text-decoration:underline;
 }
 
 </style>
@@ -102,38 +115,51 @@ select,input{
 <div class="container">
 
 <div id="nameSection">
-    <h1>Focus Room</h1>
+    <h1>Deep Focus Room</h1>
     <input type="text" id="username" placeholder="Enter your name">
     <br><br>
-    <button class="primary" onclick="showConfirmation()">Enter Focus Chamber</button>
+    <button class="primary" onclick="enterApp()">Enter Focus Chamber</button>
 </div>
 
-<div id="confirmSection" class="hidden">
-    <h2>Can we dive into deep focus?</h2>
-    <button class="primary" onclick="enterRoom()">Yes</button>
+<div id="appSection" class="hidden">
+
+    <h3>Add Today's Tasks</h3>
+
+    <input type="text" id="taskName" placeholder="Task name">
+    <input type="number" id="taskTime" placeholder="Duration (minutes)">
+    <br>
+    <button class="primary" onclick="addTask()">Add Task</button>
+
+    <div id="taskList"></div>
+
+    <div id="focusSection" class="hidden">
+        <p class="volume-note">
+            Please set your device volume to a moderate level before starting.
+        </p>
+        <h2 id="currentTaskTitle"></h2>
+        <div id="timer"></div>
+        <button class="danger" onclick="stopSession()">Emergency Exit</button>
+    </div>
+
 </div>
 
-<div id="timerSection" class="hidden">
-    <h2>Deep Focus Mode</h2>
+<hr style="margin:25px 0; opacity:0.2;">
 
-    <p class="volume-note">
-        Please set your device volume to a moderate level before starting.
+<div class="footer">
+    <p><strong>Deep Focus Room</strong></p>
+    <p>Created and designed by Your Name.</p>
+    <p>Built to promote intentional deep work and disciplined execution.</p>
+    <p>
+        Contact:
+        <a href="mailto:yourmail@example.com">yourmail@example.com</a>
     </p>
-
-    <select id="timeSelect">
-        <option value="15">15 Minutes</option>
-        <option value="30">30 Minutes</option>
-        <option value="45">45 Minutes</option>
-        <option value="60">60 Minutes</option>
-    </select>
-
-    <br><br>
-
-    <button class="primary" onclick="startTimer()">Start Focus</button>
-    <button class="danger" onclick="emergencyExit()">Emergency Exit</button>
-
-    <div id="timer"></div>
-    <div id="quote"></div>
+    <p>
+        Source Code:
+        <a href="https://github.com/yourusername/repository-name" target="_blank">
+            View on GitHub
+        </a>
+    </p>
+    <p>Version 1.0 | © 2026 Your Name</p>
 </div>
 
 <audio id="bgMusic" src="music.mp3" loop></audio>
@@ -142,63 +168,89 @@ select,input{
 
 <script>
 
+let currentUser="";
+let tasks=[];
+let activeTaskIndex=null;
 let interval;
-let exitPressed=false;
-let backPressedOnce=false;
 
-const quotes=[
-"Stay focused. Your goals matter.",
-"Discipline creates freedom.",
-"One session at a time.",
-"Focus now. Win later."
-];
-
-/* Back Button Protection */
-history.pushState(null, null, location.href);
-window.onpopstate=function(){
-    if(!backPressedOnce){
-        alert("It is focus time. Are you sure you want to leave?");
-        backPressedOnce=true;
-        history.pushState(null, null, location.href);
-    }
-    else{
-        window.history.back();
-    }
-};
-
-function showConfirmation(){
+/* ENTER APP */
+function enterApp(){
     let name=document.getElementById("username").value.trim();
-    if(name===""){
-        alert("Please enter your name.");
+    if(name===""){ alert("Enter your name."); return; }
+
+    currentUser=name;
+    document.getElementById("nameSection").classList.add("hidden");
+    document.getElementById("appSection").classList.remove("hidden");
+
+    loadTasks();
+}
+
+/* LOCAL STORAGE */
+function saveTasks(){
+    localStorage.setItem("tasks_"+currentUser, JSON.stringify(tasks));
+}
+
+function loadTasks(){
+    let stored=localStorage.getItem("tasks_"+currentUser);
+    tasks= stored ? JSON.parse(stored) : [];
+    renderTasks();
+}
+
+/* ADD TASK */
+function addTask(){
+    let name=document.getElementById("taskName").value.trim();
+    let time=parseInt(document.getElementById("taskTime").value);
+
+    if(name==="" || !time || time<=0){
+        alert("Enter valid task and duration.");
         return;
     }
-    document.getElementById("nameSection").classList.add("hidden");
-    document.getElementById("confirmSection").classList.remove("hidden");
+
+    tasks.push({name:name,time:time});
+    saveTasks();
+    renderTasks();
+
+    document.getElementById("taskName").value="";
+    document.getElementById("taskTime").value="";
 }
 
-function enterRoom(){
-    document.getElementById("confirmSection").classList.add("hidden");
-    document.getElementById("timerSection").classList.remove("hidden");
+/* RENDER TASKS */
+function renderTasks(){
+    let list=document.getElementById("taskList");
+    list.innerHTML="";
+
+    tasks.forEach((task,index)=>{
+        let div=document.createElement("div");
+        div.className="task-card";
+        div.innerHTML=`
+            <h4>${task.name}</h4>
+            <p>${task.time} minutes</p>
+            <button class="primary" onclick="startTask(${index})">Start</button>
+        `;
+        list.appendChild(div);
+    });
 }
 
-function startTimer(){
+/* START TASK */
+function startTask(index){
+    activeTaskIndex=index;
+    let task=tasks[index];
 
-    let minutes=parseInt(document.getElementById("timeSelect").value);
-    let totalSeconds=minutes*60;
+    document.getElementById("focusSection").classList.remove("hidden");
+    document.getElementById("currentTaskTitle").innerText=task.name;
 
+    let totalSeconds=task.time*60;
     let music=document.getElementById("bgMusic");
     music.volume=0.3;
     music.currentTime=0;
     music.play().catch(()=>{});
 
-    document.getElementById("quote").innerText=
-        quotes[Math.floor(Math.random()*quotes.length)];
-
     clearInterval(interval);
 
-    interval=setInterval(function(){
+    interval=setInterval(()=>{
         let m=Math.floor(totalSeconds/60);
         let s=totalSeconds%60;
+
         document.getElementById("timer").innerText=
             (m<10?"0":"")+m+":"+(s<10?"0":"")+s;
 
@@ -207,21 +259,31 @@ function startTimer(){
         if(totalSeconds<0){
             clearInterval(interval);
             music.pause();
-            alert("Session completed successfully.");
+            completeTask();
         }
+
     },1000);
 }
 
-function emergencyExit(){
-    if(!exitPressed){
-        alert("Are you sure? The focus session is still running.");
-        exitPressed=true;
+/* COMPLETE TASK */
+function completeTask(){
+    if(activeTaskIndex!==null){
+        tasks.splice(activeTaskIndex,1);
+        saveTasks();
+        renderTasks();
+        document.getElementById("focusSection").classList.add("hidden");
+        document.getElementById("timer").innerText="";
+        activeTaskIndex=null;
+        alert("Task completed successfully.");
     }
-    else{
-        clearInterval(interval);
-        document.getElementById("bgMusic").pause();
-        location.reload();
-    }
+}
+
+/* STOP SESSION */
+function stopSession(){
+    clearInterval(interval);
+    document.getElementById("bgMusic").pause();
+    document.getElementById("focusSection").classList.add("hidden");
+    document.getElementById("timer").innerText="";
 }
 
 </script>
