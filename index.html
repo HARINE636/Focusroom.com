@@ -14,12 +14,9 @@ body{
     justify-content:center;
     align-items:center;
     min-height:100vh;
-
-    /* Focus-Optimized Deep Blue Gradient */
     background:linear-gradient(-45deg, #1B3A57, #16324F, #0F2740, #1B3A57);
     background-size:400% 400%;
     animation:gradientMove 15s ease infinite;
-
     color:white;
 }
 
@@ -88,13 +85,13 @@ select,input{
     opacity:0.9;
 }
 
-@media (max-width:480px){
-    .container{
-        padding:25px 15px;
-    }
-    #timer{
-        font-size:42px;
-    }
+/* Bold Volume Notice */
+.volume-note{
+    font-weight:700;
+    font-size:18px;
+    margin-bottom:15px;
+    letter-spacing:0.5px;
+    color:#ffffff;
 }
 
 </style>
@@ -104,7 +101,6 @@ select,input{
 
 <div class="container">
 
-<!-- Name Section -->
 <div id="nameSection">
     <h1>Focus Room</h1>
     <input type="text" id="username" placeholder="Enter your name">
@@ -112,19 +108,17 @@ select,input{
     <button class="primary" onclick="showConfirmation()">Enter Focus Chamber</button>
 </div>
 
-<!-- Confirmation Section -->
 <div id="confirmSection" class="hidden">
     <h2>Can we dive into deep focus?</h2>
     <button class="primary" onclick="enterRoom()">Yes</button>
 </div>
 
-<!-- Timer Section -->
 <div id="timerSection" class="hidden">
     <h2>Deep Focus Mode</h2>
 
-    <p>Please set your device volume to a moderate level.</p>
-
-    <br>
+    <p class="volume-note">
+        Please set your device volume to a moderate level before starting.
+    </p>
 
     <select id="timeSelect">
         <option value="15">15 Minutes</option>
@@ -149,7 +143,6 @@ select,input{
 <script>
 
 let interval;
-let currentUser="";
 let exitPressed=false;
 let backPressedOnce=false;
 
@@ -179,7 +172,6 @@ function showConfirmation(){
         alert("Please enter your name.");
         return;
     }
-    currentUser=name;
     document.getElementById("nameSection").classList.add("hidden");
     document.getElementById("confirmSection").classList.remove("hidden");
 }
@@ -190,16 +182,19 @@ function enterRoom(){
 }
 
 function startTimer(){
+
     let minutes=parseInt(document.getElementById("timeSelect").value);
     let totalSeconds=minutes*60;
 
     let music=document.getElementById("bgMusic");
-    music.volume=0.3; 
+    music.volume=0.3;
     music.currentTime=0;
     music.play().catch(()=>{});
 
     document.getElementById("quote").innerText=
         quotes[Math.floor(Math.random()*quotes.length)];
+
+    clearInterval(interval);
 
     interval=setInterval(function(){
         let m=Math.floor(totalSeconds/60);
