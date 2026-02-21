@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
-
 body{
     margin:0;
     font-family:Arial, sans-serif;
@@ -62,12 +61,6 @@ input{
     margin-top:8px;
 }
 
-.volume-note{
-    font-weight:700;
-    font-size:16px;
-    margin:12px 0;
-}
-
 .task-card{
     background:rgba(255,255,255,0.12);
     padding:12px;
@@ -91,6 +84,13 @@ input{
     margin-top:20px;
 }
 
+#quote{
+    font-size:16px;
+    margin-top:15px;
+    font-style:italic;
+    opacity:0.9;
+}
+
 .footer{
     font-size:13px;
     margin-top:20px;
@@ -106,7 +106,6 @@ input{
 .footer a:hover{
     text-decoration:underline;
 }
-
 </style>
 </head>
 
@@ -133,12 +132,10 @@ input{
     <div id="taskList"></div>
 
     <div id="focusSection" class="hidden">
-        <p class="volume-note">
-            Please set your device volume to a moderate level before starting.
-        </p>
         <h2 id="currentTaskTitle"></h2>
         <div id="timer"></div>
-        <button class="danger" onclick="stopSession()">Emergency Exit</button>
+        <div id="quote"></div>
+        <button class="danger" onclick="attemptExit()">Emergency Exit</button>
     </div>
 
 </div>
@@ -167,11 +164,20 @@ input{
 </div>
 
 <script>
-
 let currentUser="";
 let tasks=[];
 let activeTaskIndex=null;
 let interval;
+let quoteInterval;
+let exitWarningShown = false;
+
+const quotes = [
+    "Focus is the key to unlocking your potential.",
+    "Discipline is choosing between what you want now and what you want most.",
+    "Stay committed to your decisions, but stay flexible in your approach.",
+    "Every step forward, no matter how small, counts.",
+    "Your mind will quit 100 times before your body does—keep going."
+];
 
 /* ENTER APP */
 function enterApp(){
@@ -244,17 +250,32 @@ function startTask(index){
     activeTaskIndex=index;
     let task=tasks[index];
 
+    // Hide everything except focus section
+    document.getElementById("taskList").classList.add("hidden");
+    document.getElementById("taskName").classList.add("hidden");
+    document.getElementById("taskTime").classList.add("hidden");
+    document.querySelector("#appSection h3").classList.add("hidden");
+
     document.getElementById("focusSection").classList.remove("hidden");
     document.getElementById("currentTaskTitle").innerText=task.name;
 
-    let totalSeconds=task.time*60;
-    let music=document.getElementById("bgMusic");
-    music.volume=0.3;
-    music.currentTime=0;
+    // Ask for volume confirmation first
+    alert("Please set your device volume to a moderate level and click OK to start the timer.");
+
+    let totalSeconds = task.time * 60;
+    let music = document.getElementById("bgMusic");
+    music.volume = 0.3;
+    music.currentTime = 0;
     music.play().catch(()=>{});
 
     clearInterval(interval);
+    clearInterval(quoteInterval);
+    exitWarningShown = false;
 
+    // Show first quote immediately
+    updateQuote();
+
+    // Timer countdown
     interval=setInterval(()=>{
         let m=Math.floor(totalSeconds/60);
         let s=totalSeconds%60;
@@ -266,11 +287,31 @@ function startTask(index){
 
         if(totalSeconds<0){
             clearInterval(interval);
+            clearInterval(quoteInterval);
             music.pause();
             completeTask();
         }
 
     },1000);
+
+    // Change quote every 15 minutes
+    quoteInterval = setInterval(updateQuote, 15*60*1000);
+}
+
+/* UPDATE QUOTE */
+function updateQuote(){
+    let q = quotes[Math.floor(Math.random() * quotes.length)];
+    document.getElementById("quote").innerText = q;
+}
+
+/* ATTEMPT EXIT (EMERGENCY EXIT BUTTON) */
+function attemptExit(){
+    if(!exitWarningShown){
+        alert("Are you sure you want to leave? Stay focused for your own growth!");
+        exitWarningShown = true;
+    } else {
+        stopSession();
+    }
 }
 
 /* COMPLETE TASK */
@@ -281,7 +322,15 @@ function completeTask(){
         renderTasks();
         document.getElementById("focusSection").classList.add("hidden");
         document.getElementById("timer").innerText="";
+        document.getElementById("quote").innerText="";
         activeTaskIndex=null;
+
+        // Show input/task list again
+        document.getElementById("taskList").classList.remove("hidden");
+        document.getElementById("taskName").classList.remove("hidden");
+        document.getElementById("taskTime").classList.remove("hidden");
+        document.querySelector("#appSection h3").classList.remove("hidden");
+
         alert("Task completed successfully.");
     }
 }
@@ -289,11 +338,30 @@ function completeTask(){
 /* STOP SESSION */
 function stopSession(){
     clearInterval(interval);
+    clearInterval(quoteInterval);
     document.getElementById("bgMusic").pause();
     document.getElementById("focusSection").classList.add("hidden");
     document.getElementById("timer").innerText="";
+    document.getElementById("quote").innerText="";
+
+    // Show input/task list again
+    document.getElementById("taskList").classList.remove("hidden");
+    document.getElementById("taskName").classList.remove("hidden");
+    document.getElementById("taskTime").classList.remove("hidden");
+    document.querySelector("#appSection h3").classList.remove("hidden");
 }
 
+/* WARN ON BROWSER BACK BUTTON DURING FOCUS SESSION */
+window.addEventListener("beforeunload", function (e) {
+    if(activeTaskIndex!==null){
+        if(!exitWarningShown){
+            exitWarningShown = true;
+            e.preventDefault();
+            e.returnValue = "Are you sure you want to leave? Stay focused for your own growth!";
+            return "Are you sure you want to leave? Stay focused for your own growth!";
+        }
+    }
+});
 </script>
 
 </body>
