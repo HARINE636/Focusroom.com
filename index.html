@@ -214,7 +214,7 @@ function addTask(){
     document.getElementById("taskTime").value="";
 }
 
-/* RENDER TASKS */
+/* RENDER TASKS WITH DELETE OPTION */
 function renderTasks(){
     let list=document.getElementById("taskList");
     list.innerHTML="";
@@ -226,9 +226,17 @@ function renderTasks(){
             <h4>${task.name}</h4>
             <p>${task.time} minutes</p>
             <button class="primary" onclick="startTask(${index})">Start</button>
+            <button class="danger" onclick="deleteTask(${index})">Delete</button>
         `;
         list.appendChild(div);
     });
+}
+
+/* DELETE TASK */
+function deleteTask(index){
+    tasks.splice(index,1);
+    saveTasks();
+    renderTasks();
 }
 
 /* START TASK */
