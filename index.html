@@ -106,12 +106,18 @@ select,input{
     <h1>Focus Room</h1>
     <input type="text" id="username" placeholder="Enter your name">
     <br><br>
-    <button class="primary" onclick="enterRoom()">Enter Focus Chamber</button>
+    <button class="primary" onclick="showConfirmation()">Enter Focus Chamber</button>
+</div>
+
+<!-- Confirmation Section -->
+<div id="confirmSection" class="hidden">
+    <h2>Can we dive into deep focus?</h2>
+    <button class="primary" onclick="enterRoom()">Yup</button>
 </div>
 
 <!-- Timer Section -->
 <div id="timerSection" class="hidden">
-    <h2 id="roomTitle">Deep Focus Mode</h2>
+    <h2>Deep Focus Mode</h2>
 
     <br>
 
@@ -148,7 +154,7 @@ const quotes=[
 "Focus now. Win later."
 ];
 
-function enterRoom(){
+function showConfirmation(){
     let name=document.getElementById("username").value.trim();
     if(name===""){
         alert("Enter your name");
@@ -156,6 +162,11 @@ function enterRoom(){
     }
     currentUser=name;
     document.getElementById("nameSection").classList.add("hidden");
+    document.getElementById("confirmSection").classList.remove("hidden");
+}
+
+function enterRoom(){
+    document.getElementById("confirmSection").classList.add("hidden");
     document.getElementById("timerSection").classList.remove("hidden");
 }
 
