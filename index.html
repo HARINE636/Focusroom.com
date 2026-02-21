@@ -7,7 +7,6 @@
 
 <style>
 
-/* Animated Blue Gradient Background */
 body{
     margin:0;
     font-family:Arial, sans-serif;
@@ -27,7 +26,6 @@ body{
     100% {background-position:0% 50%;}
 }
 
-/* Portrait Glass Card */
 .container{
     width:95%;
     max-width:420px;
@@ -87,10 +85,6 @@ select,input{
     opacity:0.9;
 }
 
-#groupUsers{
-    margin-top:15px;
-}
-
 @media (max-width:480px){
     .container{
         padding:25px 15px;
@@ -112,21 +106,12 @@ select,input{
     <h1>Focus Room</h1>
     <input type="text" id="username" placeholder="Enter your name">
     <br><br>
-    <button class="primary" onclick="saveName()">Continue</button>
-</div>
-
-<!-- Room Selection -->
-<div id="roomSection" class="hidden">
-    <h2>Select Room</h2>
-    <button class="primary" onclick="selectRoom('private')">Private Room</button>
-    <button class="primary" onclick="selectRoom('group')">Group Room</button>
+    <button class="primary" onclick="enterRoom()">Enter Focus Chamber</button>
 </div>
 
 <!-- Timer Section -->
 <div id="timerSection" class="hidden">
-    <h2 id="roomTitle"></h2>
-
-    <div id="groupUsers"></div>
+    <h2 id="roomTitle">Deep Focus Mode</h2>
 
     <br>
 
@@ -151,6 +136,7 @@ select,input{
 </div>
 
 <script>
+
 let interval;
 let currentUser="";
 let exitPressed=false;
@@ -162,7 +148,7 @@ const quotes=[
 "Focus now. Win later."
 ];
 
-function saveName(){
+function enterRoom(){
     let name=document.getElementById("username").value.trim();
     if(name===""){
         alert("Enter your name");
@@ -170,33 +156,7 @@ function saveName(){
     }
     currentUser=name;
     document.getElementById("nameSection").classList.add("hidden");
-    document.getElementById("roomSection").classList.remove("hidden");
-}
-
-function selectRoom(type){
-    document.getElementById("roomSection").classList.add("hidden");
     document.getElementById("timerSection").classList.remove("hidden");
-
-    if(type==="private"){
-        document.getElementById("roomTitle").innerText="Private Focus Room";
-        document.getElementById("groupUsers").innerText="";
-    }
-    else{
-        document.getElementById("roomTitle").innerText="Group Focus Room";
-
-        let users=JSON.parse(localStorage.getItem("groupUsers"))||[];
-
-        if(!users.includes(currentUser)){
-            users.push(currentUser);
-            localStorage.setItem("groupUsers",JSON.stringify(users));
-        }
-
-        if(users.length===0){
-            document.getElementById("groupUsers").innerText="Nobody has joined yet.";
-        }else{
-            document.getElementById("groupUsers").innerText="Users in room: "+users.join(", ");
-        }
-    }
 }
 
 function startTimer(){
@@ -237,6 +197,7 @@ function emergencyExit(){
         location.reload();
     }
 }
+
 </script>
 
 </body>
