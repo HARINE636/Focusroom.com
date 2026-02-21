@@ -14,9 +14,12 @@ body{
     justify-content:center;
     align-items:center;
     min-height:100vh;
-    background:linear-gradient(-45deg, #0f2027, #203a43, #2c5364, #1e3c72);
+
+    /* Focus-Optimized Deep Blue Gradient */
+    background:linear-gradient(-45deg, #1B3A57, #16324F, #0F2740, #1B3A57);
     background-size:400% 400%;
-    animation:gradientMove 12s ease infinite;
+    animation:gradientMove 15s ease infinite;
+
     color:white;
 }
 
@@ -56,8 +59,8 @@ button:hover{
 }
 
 .primary{
-    background:#00c6ff;
-    color:black;
+    background:#2E6F95;
+    color:white;
 }
 
 .danger{
@@ -112,12 +115,14 @@ select,input{
 <!-- Confirmation Section -->
 <div id="confirmSection" class="hidden">
     <h2>Can we dive into deep focus?</h2>
-    <button class="primary" onclick="enterRoom()">Yup</button>
+    <button class="primary" onclick="enterRoom()">Yes</button>
 </div>
 
 <!-- Timer Section -->
 <div id="timerSection" class="hidden">
     <h2>Deep Focus Mode</h2>
+
+    <p>Please set your device volume to a moderate level.</p>
 
     <br>
 
@@ -146,6 +151,7 @@ select,input{
 let interval;
 let currentUser="";
 let exitPressed=false;
+let backPressedOnce=false;
 
 const quotes=[
 "Stay focused. Your goals matter.",
@@ -154,10 +160,23 @@ const quotes=[
 "Focus now. Win later."
 ];
 
+/* Back Button Protection */
+history.pushState(null, null, location.href);
+window.onpopstate=function(){
+    if(!backPressedOnce){
+        alert("It is focus time. Are you sure you want to leave?");
+        backPressedOnce=true;
+        history.pushState(null, null, location.href);
+    }
+    else{
+        window.history.back();
+    }
+};
+
 function showConfirmation(){
     let name=document.getElementById("username").value.trim();
     if(name===""){
-        alert("Enter your name");
+        alert("Please enter your name.");
         return;
     }
     currentUser=name;
@@ -175,6 +194,7 @@ function startTimer(){
     let totalSeconds=minutes*60;
 
     let music=document.getElementById("bgMusic");
+    music.volume=0.3; 
     music.currentTime=0;
     music.play().catch(()=>{});
 
@@ -192,14 +212,14 @@ function startTimer(){
         if(totalSeconds<0){
             clearInterval(interval);
             music.pause();
-            alert("Session Completed!");
+            alert("Session completed successfully.");
         }
     },1000);
 }
 
 function emergencyExit(){
     if(!exitPressed){
-        alert("Are you sure? Focus is still running.");
+        alert("Are you sure? The focus session is still running.");
         exitPressed=true;
     }
     else{
